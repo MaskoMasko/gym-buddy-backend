@@ -1,0 +1,58 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model User {
+    id            Int     @id @default(autoincrement())
+    email         String  @unique
+    name          String?
+    emailVerified Boolean @default(false)
+    token         String?
+    // I have no idea how this works...
+    friends       User[]  @relation("Friends")
+    userAsFriend  User[]  @relation("Friends")
+
+    chatRooms  ChatRoom[] @relation("ChatRoomParticipants")
+    messages   Message[]  @relation("Sender")
+    ChatRoom   ChatRoom?  @relation(fields: [chatRoomId], references: [id])
+    chatRoomId Int?
+    Message    Message[]
+    userId     Int?
+}
+
+// ChatRoom model
+model ChatRoom {
+    id           Int       @id @default(autoincrement())
+    name         String
+    participants User[]    @relation("ChatRoomParticipants")
+    messages     Message[]
+    User         User[]
+}
+
+// Message model
+model Message {
+    id        Int      @id @default(autoincrement())
+    text      String
+    createdAt DateTime @default(now())
+    sender    User     @relation("Sender", fields: [senderId], references: [id])
+    chatRoom  ChatRoom @relation(fields: [chatRoomId], references: [id])
+
+    senderId   Int
+    chatRoomId Int
+    User       User? @relation(fields: [userId], references: [id])
+    userId     Int?
+}
+
+//GymLocation
+model GymLocation {
+    id        Int     @id @default(autoincrement())
+    name      String
+    rating    Float
+    latitude  Decimal
+    longitude Decimal
+}
