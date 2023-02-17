@@ -12,6 +12,7 @@ model User {
     email         String  @unique
     name          String?
     emailVerified Boolean @default(false)
+    password      String  @default("")
     token         String?
     // I have no idea how this works...
     friends       User[]  @relation("Friends")
