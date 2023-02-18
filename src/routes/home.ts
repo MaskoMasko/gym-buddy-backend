@@ -10,6 +10,7 @@ interface JwtPayload extends ORJwtPayload {
 const router = express.Router();
 router.get("/home", async (req, res) => {
   const token = req.header("Authorization")?.replace("Bearer ", "")!;
+  console.log(token);
   try {
     const decoded = jwt.verify(token, secretKey);
     const user = await client.user.findFirst({
@@ -20,10 +21,10 @@ router.get("/home", async (req, res) => {
     if (!user || !isEmailVerified) {
       res.status(401).send({ message: "Not authorized." });
     } else {
-      res.send({ message: "Access granted." });
+      res.json({ user });
     }
   } catch (error) {
-    return res.status(401).send({ message: "Not authorized." });
+    return res.status(401).json({ message: "Not authorized." });
   }
 });
 
