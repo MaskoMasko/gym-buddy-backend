@@ -7,7 +7,7 @@ router.get("/chat-room", async (req, res) => {
   const chatRooms = await client.chatRoom.findMany();
   if (!chatRooms) {
     return res.send({
-      message: "To start create chat room: GET -> /create-room",
+      message: "To start create chat room: POST -> /create-room",
     });
   }
   return res.json(chatRooms);
@@ -38,20 +38,20 @@ router.get("/chat-room/:chatRoomId", async (req, res) => {
   });
 });
 
-router.get("/create-room", async (req, res) => {
-  const addedUserIds = [1, 2];
+router.post("/create-room", async (req, res) => {
+  const { user1Id, user2Id, roomName } = req.body;
   const newChatRoom = await client.chatRoom.create({
     data: {
-      name: "Grup[a",
+      name: roomName,
       participants: {
         connect: [
-          { id: 1 }, // Connect user with id 1
-          { id: 2 }, // Connect user with id 2
+          { id: user1Id }, // Connect user with id 1
+          { id: user2Id }, // Connect user with id 2
         ],
       },
     },
   });
-  for (const id of addedUserIds) {
+  for (const id of [user1Id, user2Id]) {
     await client.user.update({
       where: {
         id,
@@ -66,6 +66,22 @@ router.get("/create-room", async (req, res) => {
   return res
     .status(500)
     .send({ message: "Error while creating chat room. Try again later!" });
+});
+
+router.get(`/users-chat-rooms/:userId`, async (req, res) => {
+  const { userId } = req.params;
+  const userWithChatRooms = await client.user.findFirst({
+    where: {
+      id: Number(userId),
+    },
+    include: {
+      chatRooms: true,
+    },
+  });
+  if (!userWithChatRooms) {
+    return res.send(`User with id ${userId} does not exist`);
+  }
+  res.json({ data: userWithChatRooms.chatRooms });
 });
 
 export default router;

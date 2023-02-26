@@ -15,13 +15,24 @@ router.get("/home", async (req, res) => {
     const decoded = jwt.verify(token, secretKey);
     const user = await client.user.findFirst({
       where: { email: (decoded as JwtPayload).email },
+      include: { friends: true, chatRooms: true },
     });
     const isEmailVerified = user?.emailVerified;
-    console.log({ home: user });
     if (!user || !isEmailVerified) {
       res.status(401).send({ message: "Not authorized." });
     } else {
-      res.json({ user });
+      res.json({
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          friends: user.friends.map(({ name, id }) => ({
+            id,
+            name,
+          })),
+          chatRooms: user.chatRooms,
+        },
+      });
     }
   } catch (error) {
     return res.status(401).json({ message: "Not authorized." });

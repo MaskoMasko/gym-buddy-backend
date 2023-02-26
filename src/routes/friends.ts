@@ -3,6 +3,11 @@ import { client } from "../prismaClient";
 
 const router = express.Router();
 
+router.get("/users", async (req, res) => {
+  const users = await client.user.findMany();
+  res.json({ data: users.map(({ id, name }) => ({ id, name })) });
+});
+
 router.post("/add-friend/:userId", async (req, res) => {
   const { userId } = req.params;
   const { friendId } = req.body;

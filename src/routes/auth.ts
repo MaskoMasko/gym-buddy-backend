@@ -6,8 +6,15 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 
 const router = express.Router();
+
+if (!process.env.JWT_SECRET_KEY) {
+  throw Error(
+    "process.env.JWT_SECRET_KEY is undefined. Check your env file configuration."
+  );
+}
 //jwt secret key
-export const secretKey = crypto.randomBytes(64).toString("hex");
+// export const secretKey = crypto.randomBytes(64).toString("hex");
+export const secretKey = process.env.JWT_SECRET_KEY;
 
 if (!process.env.SENDGRID_API_KEY) {
   throw Error(
@@ -15,6 +22,13 @@ if (!process.env.SENDGRID_API_KEY) {
   );
 }
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+router.post("/refresh-token", async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Refresh token missing" });
+  }
+});
 
 router.post("/login", async (req, res) => {
   const { email } = req.body;
@@ -34,7 +48,7 @@ router.post("/login", async (req, res) => {
     } else {
       const passwordMatches = await bcrypt.compare(
         req.body.password,
-        user.password
+        user.password!
       );
       if (!passwordMatches) {
         return res.json({ error: "Invalid email or password" });
