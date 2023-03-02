@@ -1,25 +1,29 @@
 import express from "express";
 import jwt, { JwtPayload as ORJwtPayload } from "jsonwebtoken";
 import { client } from "../prismaClient";
-import { jwtSecret } from "./auth";
+import { jwtSecret } from "../constants";
+import { authenticateToken } from "../middleware";
 
 interface JwtPayload extends ORJwtPayload {
   email: string;
+  userId: string;
 }
 
 const router = express.Router();
-router.get("/home", async (req, res) => {
+router.get("/home", authenticateToken, async (req, res) => {
   const token = req.header("Authorization")?.replace("Bearer ", "")!;
   console.log(token);
   try {
     const decoded = jwt.verify(token, jwtSecret);
+    const userId = (decoded as JwtPayload).userId;
     const user = await client.user.findFirst({
-      where: { email: (decoded as JwtPayload).email },
+      where: { id: Number(userId) },
       include: { friends: true, chatRooms: true },
     });
     const isEmailVerified = user?.emailVerified;
+    console.log(user);
     if (!user || !isEmailVerified) {
-      res.status(401).send({ message: "Not authorized." });
+      res.send({ message: "Not authorized." });
     } else {
       res.json({
         user: {

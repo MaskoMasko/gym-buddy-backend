@@ -13,7 +13,8 @@ model User {
     name          String?
     emailVerified Boolean @default(false)
     password      String?
-    token         String?
+    accessToken   String?
+    refreshToken  String?
     // I have no idea how this works...
     friends       User[]  @relation("Friends")
     userAsFriend  User[]  @relation("Friends")

@@ -3,14 +3,10 @@ import { client } from "../prismaClient";
 import sgMail from "@sendgrid/mail";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { jwtSecret, refreshJwtSecret } from "../constants";
 
 const router = express.Router();
 
-if (!process.env.JWT_SECRET_KEY) {
-  throw Error(
-    "process.env.JWT_SECRET_KEY is undefined. Check your env file configuration."
-  );
-}
 if (!process.env.SENDGRID_API_KEY) {
   throw Error(
     "process.env.SENDGRID_API_KEY is undefined. Check your env file configuration."
@@ -22,11 +18,29 @@ if (!process.env.EMAIL) {
   );
 }
 
-//jwt secret key
-// export const secretKey = crypto.randomBytes(64).toString("hex");
-export const jwtSecret = process.env.JWT_SECRET_KEY;
 const sendToMail = process.env.EMAIL;
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+router.post("/refresh-token", async (req, res) => {
+  const refreshToken = req.body.token;
+  if (refreshToken == null) return res.sendStatus(401);
+  jwt.verify(refreshToken, refreshJwtSecret, async (err: any, userId: any) => {
+    if (err) return res.sendStatus(403);
+    const user = await client.user.findFirst({ where: { refreshToken } });
+    if (!user) {
+      return res.sendStatus(401);
+    }
+    const accessToken = jwt.sign({ userId: user.id }, jwtSecret, {
+      expiresIn: "1h",
+    });
+    const updatedUser = await client.user.update({
+      where: { id: user.id },
+      data: { accessToken: accessToken },
+    });
+
+    res.json({ user: updatedUser });
+  });
+});
 
 router.post("/login", async (req, res) => {
   const { email } = req.body;
@@ -51,7 +65,14 @@ router.post("/login", async (req, res) => {
       if (!passwordMatches) {
         return res.json({ error: "Invalid email or password" });
       }
-      return res.json({ message: "Login successful", user });
+
+      const refreshToken = jwt.sign({ userId: user.id }, refreshJwtSecret);
+      const newUser = await client.user.update({
+        where: { id: user.id },
+        data: { refreshToken },
+      });
+
+      return res.json({ message: "Login successful", user: newUser });
     }
   } else {
     const user = await client.user.findFirst({
@@ -88,10 +109,10 @@ router.post("/signup", async (req, res) => {
       password: hashedPassword,
     },
   });
-  const token = jwt.sign({ userId: user.id }, jwtSecret);
+  const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: "1h" });
   const newUser = await client.user.update({
     where: { id: user.id },
-    data: { token },
+    data: { accessToken: token },
   });
   console.log({ signup: newUser });
   if (!user) {
@@ -121,7 +142,7 @@ router.post("/signup", async (req, res) => {
 router.get("/verify", async (req, res) => {
   const token = req.query.token;
   const user = await client.user.findFirst({
-    where: { token: token as string },
+    where: { accessToken: token as string },
   });
   if (!user) {
     return res.status(400).send("Invalid token");
