@@ -1,14 +1,16 @@
 import bodyParser from "body-parser";
+import cookieparser from "cookie-parser";
 import express from "express";
 import authRouter from "./routes/auth";
-import home from "./routes/home";
 import chatRoom from "./routes/chatRoom";
-import messages from "./routes/messages";
-import gymLocations from "./routes/gymLocations";
 import friends from "./routes/friends";
+import gymLocations from "./routes/gymLocations";
+import home from "./routes/home";
+import messages from "./routes/messages";
 
 const app = express();
 app.use(bodyParser.urlencoded());
+app.use(cookieparser());
 
 app.use(bodyParser.json());
 app.use("/", authRouter);

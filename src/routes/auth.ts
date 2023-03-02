@@ -2,7 +2,6 @@ import express from "express";
 import { client } from "../prismaClient";
 import sgMail from "@sendgrid/mail";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import bcrypt from "bcrypt";
 
 const router = express.Router();
@@ -12,23 +11,22 @@ if (!process.env.JWT_SECRET_KEY) {
     "process.env.JWT_SECRET_KEY is undefined. Check your env file configuration."
   );
 }
-//jwt secret key
-// export const secretKey = crypto.randomBytes(64).toString("hex");
-export const secretKey = process.env.JWT_SECRET_KEY;
-
 if (!process.env.SENDGRID_API_KEY) {
   throw Error(
     "process.env.SENDGRID_API_KEY is undefined. Check your env file configuration."
   );
 }
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+if (!process.env.EMAIL) {
+  throw Error(
+    "process.env.EMAIL is undefined. Check your env file configuration."
+  );
+}
 
-router.post("/refresh-token", async (req, res) => {
-  const { refreshToken } = req.body;
-  if (!refreshToken) {
-    return res.status(401).json({ message: "Refresh token missing" });
-  }
-});
+//jwt secret key
+// export const secretKey = crypto.randomBytes(64).toString("hex");
+export const jwtSecret = process.env.JWT_SECRET_KEY;
+const sendToMail = process.env.EMAIL;
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 router.post("/login", async (req, res) => {
   const { email } = req.body;
@@ -74,9 +72,6 @@ router.post("/login", async (req, res) => {
 
 router.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
-  const verificationToken = jwt.sign({ email }, secretKey, {
-    expiresIn: "24h",
-  });
   const existingUser = await client.user.findFirst({ where: { email } });
   if (existingUser) {
     return res.json({
@@ -91,24 +86,23 @@ router.post("/signup", async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      token: verificationToken,
     },
   });
-  console.log({ signup: user });
+  const token = jwt.sign({ userId: user.id }, jwtSecret);
+  const newUser = await client.user.update({
+    where: { id: user.id },
+    data: { token },
+  });
+  console.log({ signup: newUser });
   if (!user) {
     throw Error("Error while creating a user. Try again later!");
   }
-  if (!process.env.EMAIL) {
-    throw Error(
-      "process.env.EMAIL is undefined. Check your env file configuration."
-    );
-  }
   const msg = {
-    to: process.env.EMAIL, // Change to your recipient
-    from: process.env.EMAIL, // Change to your verified sender
+    to: sendToMail, // Change to your recipient
+    from: sendToMail, // Change to your verified sender
     subject: "Sending with SendGrid is Fun",
     text: "and easy to do anywhere, even with Node.js",
-    html: `<strong><a href="http://localhost:4000/verify?token=${verificationToken}">Verify email</a></strong>`,
+    html: `<strong><a href="http://localhost:4000/verify?token=${token}">Verify email</a></strong>`,
   };
   sgMail
     .send(msg)
@@ -116,7 +110,7 @@ router.post("/signup", async (req, res) => {
       res.json({
         message:
           "User was successfully created. Verify your email to continue!",
-        user,
+        newUser,
       });
     })
     .catch((error) => {
@@ -149,14 +143,10 @@ router.post("/forgot-password", async (req, res) => {
   if (!user) {
     throw Error(`Email ${email} doesn't exist in our database!`);
   }
-  if (!process.env.EMAIL) {
-    throw Error(
-      "process.env.EMAIL is undefined. Check your env file configuration."
-    );
-  }
+
   const msg = {
-    to: process.env.EMAIL, // Change to your recipient
-    from: process.env.EMAIL, // Change to your verified sender
+    to: sendToMail, // Change to your recipient
+    from: sendToMail, // Change to your verified sender
     subject: "Forgot password",
     text: "forgot password",
     html: `<strong><a href="http://localhost:4000/password-reset-success">Reset password</a></strong>`,

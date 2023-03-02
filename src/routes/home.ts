@@ -1,7 +1,7 @@
 import express from "express";
 import jwt, { JwtPayload as ORJwtPayload } from "jsonwebtoken";
 import { client } from "../prismaClient";
-import { secretKey } from "./auth";
+import { jwtSecret } from "./auth";
 
 interface JwtPayload extends ORJwtPayload {
   email: string;
@@ -12,7 +12,7 @@ router.get("/home", async (req, res) => {
   const token = req.header("Authorization")?.replace("Bearer ", "")!;
   console.log(token);
   try {
-    const decoded = jwt.verify(token, secretKey);
+    const decoded = jwt.verify(token, jwtSecret);
     const user = await client.user.findFirst({
       where: { email: (decoded as JwtPayload).email },
       include: { friends: true, chatRooms: true },
