@@ -24,7 +24,7 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 router.post("/refresh-token", async (req, res) => {
   const refreshToken = req.body.token;
   if (refreshToken == null) return res.sendStatus(401);
-  jwt.verify(refreshToken, refreshJwtSecret, async (err: any, userId: any) => {
+  jwt.verify(refreshToken, refreshJwtSecret, async (err: any) => {
     if (err) return res.sendStatus(403);
     const user = await client.user.findFirst({ where: { refreshToken } });
     if (!user) {
@@ -70,6 +70,7 @@ router.post("/login", async (req, res) => {
       const newUser = await client.user.update({
         where: { id: user.id },
         data: { refreshToken },
+        include: { friends: true },
       });
 
       return res.json({ message: "Login successful", user: newUser });

@@ -40,7 +40,7 @@ router.get("/chat-room/:chatRoomId", async (req, res) => {
 
 router.post("/create-room", async (req, res) => {
   const { user1Id, user2Id, roomName } = req.body;
-  const newChatRoom = await client.chatRoom.create({
+  const chatRoom = await client.chatRoom.create({
     data: {
       name: roomName,
       participants: {
@@ -56,12 +56,15 @@ router.post("/create-room", async (req, res) => {
       where: {
         id,
       },
-      data: { chatRoomId: newChatRoom.id },
+      data: { chatRoomId: chatRoom.id },
     });
   }
-  console.log(newChatRoom);
+  const newChatRoom = await client.chatRoom.findFirst({
+    where: { id: chatRoom.id },
+    include: { participants: true },
+  });
   if (newChatRoom) {
-    return res.send({ message: "Chat Room was successfully created!" });
+    return res.send({ data: newChatRoom });
   }
   return res
     .status(500)

@@ -8,6 +8,15 @@ router.get("/users", async (req, res) => {
   res.json({ data: users.map(({ id, name }) => ({ id, name })) });
 });
 
+router.get("/clear-friends/:userId", async (req, res) => {
+  const userId = req.params.userId;
+  await client.user.update({
+    where: { id: Number(userId) },
+    data: { friends: { set: [] } },
+  });
+  res.send("success");
+});
+
 router.post("/add-friend/:userId", async (req, res) => {
   const { userId } = req.params;
   const { friendId } = req.body;
