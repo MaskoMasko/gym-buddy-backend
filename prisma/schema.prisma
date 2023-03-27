@@ -58,3 +58,11 @@ model GymLocation {
     latitude  Decimal
     longitude Decimal
 }
+
+model Workout {
+    id         Int    @id @default(autoincrement())
+    type       String
+    difficulty String
+    duration   Int[]
+    equipment  String
+}
