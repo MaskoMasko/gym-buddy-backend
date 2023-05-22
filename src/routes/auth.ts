@@ -115,7 +115,7 @@ router.post("/signup", async (req, res) => {
     where: { id: user.id },
     data: { accessToken: token },
   });
-  console.log({ signup: newUser });
+  // console.log({ signup: newUser });
   if (!user) {
     throw Error("Error while creating a user. Try again later!");
   }
@@ -152,7 +152,7 @@ router.get("/verify", async (req, res) => {
     where: { id: user.id },
     data: { emailVerified: true },
   });
-  console.log({ verifiedUser: updatedUser });
+  // console.log({ verifiedUser: updatedUser });
   res.send("Email verified");
 });
 router.post("/forgot-password", async (req, res) => {

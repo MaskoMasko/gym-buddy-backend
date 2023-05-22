@@ -9,8 +9,43 @@ import home from "./routes/home";
 import messages from "./routes/messages";
 import workouts from "./routes/workouts";
 import blogs from "./routes/blogs";
+import { Server } from "socket.io";
+import http from "http";
+import { client } from "./prismaClient";
 
 const app = express();
+const server = http.createServer(app);
+export const io = new Server(server);
+// io.emit("greeting", "Greetings ");
+io.on("connection", (socket) => {
+  socket.emit("greeting", "this is something");
+});
+//   // io.sockets.emit("message", "this is my message");
+//   socket.emit("greeting", "hello world");
+// });
+// io.on("greeting", () => {
+//   console.log("this is something");
+// });
+
+// io.on("connection", (socket) => {
+//   socket.on("message", async (msg) => {
+//     console.log(JSON.stringify(msg));
+//     await client.message.create({
+//       data: {
+//         text: msg.text,
+//         sender: { connect: { id: parseInt(msg.senderId) } },
+//         chatRoom: { connect: { id: parseInt(msg.chatRoomId) } },
+//       },
+//     });
+//     io.emit("message", msg);
+//   });
+//   socket.on("disconnect", () => {
+//     console.log("user disconnected");
+//   });
+// });
+app.get("/testing", (req, res) => {
+  res.sendFile(__dirname + "/testing.html");
+});
 app.use(bodyParser.urlencoded());
 app.use(cookieparser());
 
@@ -25,6 +60,6 @@ app.use("/", friends);
 app.use("/", workouts);
 app.use("/", blogs);
 
-app.listen(4000, () => {
+server.listen(4000, () => {
   console.log(`Server running on http://localhost:4000`);
 });

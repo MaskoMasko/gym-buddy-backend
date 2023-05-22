@@ -22,7 +22,9 @@
     "passport-local": "^1.0.0",
     "passport-magic-link": "^2.1.0",
     "prisma": "^4.10.1",
-    "puppeteer": "^19.7.5"
+    "puppeteer": "^19.7.5",
+    "socket.io": "^4.6.1",
+    "socket.io-client": "^4.6.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",

@@ -24,7 +24,7 @@ router.get("/chat-room/:chatRoomId", async (req, res) => {
   if (!chatRoom) {
     return res.send({ message: "There is no chat room with that id" });
   }
-  console.log(users);
+  // console.log(users);
   const usersFromChatRoom = users.filter(
     (user) => user.chatRoomId === chatRoom.id
   );

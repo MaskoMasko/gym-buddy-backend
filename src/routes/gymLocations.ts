@@ -13,7 +13,7 @@ router.get("/add-location", async (req, res) => {
       longitude: 13.8704421,
     },
   });
-  console.log({ location });
+  // console.log({ location });
   if (!location) {
     res
       .status(500)

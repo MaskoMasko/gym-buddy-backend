@@ -12,7 +12,7 @@ interface JwtPayload extends ORJwtPayload {
 const router = express.Router();
 router.get("/home", authenticateToken, async (req, res) => {
   const token = req.header("Authorization")?.replace("Bearer ", "")!;
-  console.log(token);
+  // console.log(token);
   try {
     const decoded = jwt.verify(token, jwtSecret);
     const userId = (decoded as JwtPayload).userId;
@@ -21,7 +21,7 @@ router.get("/home", authenticateToken, async (req, res) => {
       include: { friends: true, chatRooms: { include: { messages: true } } },
     });
     const isEmailVerified = user?.emailVerified;
-    console.log(user);
+    // console.log(user);
     if (!user || !isEmailVerified) {
       res.send({ message: "Not authorized." });
     } else {
