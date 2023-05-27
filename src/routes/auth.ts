@@ -70,9 +70,15 @@ router.post("/login", async (req, res) => {
       const newUser = await client.user.update({
         where: { id: user.id },
         data: { refreshToken },
-        include: { friends: true },
+        include: {
+          friends: true,
+          chatRooms: {
+            include: {
+              messages: true,
+            },
+          },
+        },
       });
-
       return res.json({ message: "Login successful", user: newUser });
     }
   } else {
