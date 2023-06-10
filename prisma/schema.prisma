@@ -60,9 +60,9 @@ model GymLocation {
 }
 
 model Workout {
-    id         Int    @id @default(autoincrement())
+    id         Int     @id @default(autoincrement())
     type       String
     difficulty String
-    duration   Int[]
-    equipment  String
+    duration   Int
+    equipment  Boolean
 }

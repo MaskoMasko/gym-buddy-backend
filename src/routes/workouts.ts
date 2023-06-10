@@ -1,12 +1,9 @@
 import express from "express";
 import { client } from "../prismaClient";
+import { Workout } from "@prisma/client";
+import _ from "lodash";
 
 const router = express.Router();
-
-// TYPE: "CHEST" | "ABS" | "LEGS" | "ARMS" | "BACK" | "FULL BODY" | "UPPER BODY" | "LOWERBODY"
-// DIFFICULTY: BEGINNER | ADVANCED | INTERMEDIATE
-// DURATION: 15 | 30  | 45 | 60
-// EQUIPMENT: "No equipment (bodyweight)" | "Weighted workout"
 
 router.get("/workouts/:filter", async (req, res) => {
   const { filter } = req.params;
@@ -20,7 +17,30 @@ router.get("/workouts/:filter", async (req, res) => {
 
 router.get("/workouts", async (req, res) => {
   const workouts = await client.workout.findMany();
-  res.json({ data: workouts });
+  const params = req.query;
+  let filteredWorkouts: Workout[] = [];
+  filteredWorkouts = _.flatten(
+    _.castArray(params.type ?? []).map((type) =>
+      workouts.filter((workout) => {
+        if (
+          workout.type === type &&
+          //if param is undefined, fallback to workout property
+          workout.difficulty === (params.difficulty ?? workout.difficulty) &&
+          workout.duration === Number(params?.duration ?? workout.duration) &&
+          workout.equipment ===
+            //we have to be careful here, cause if equipment is undefined,
+            // it will return workouts with equipment: false -> Boolean(undefined) === false
+            (params?.equipment !== undefined
+              ? Boolean(params.equipment)
+              : workout.equipment)
+        ) {
+          return workout;
+        }
+      })
+    )
+  );
+
+  res.json({ data: filteredWorkouts });
 });
 
 router.post("/add-workout", async (req, res) => {
