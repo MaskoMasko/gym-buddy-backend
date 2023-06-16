@@ -23,7 +23,7 @@ router.get("/workouts", async (req, res) => {
     _.castArray(params.type ?? []).map((type) =>
       workouts.filter((workout) => {
         if (
-          workout.type === type &&
+          workout.type === _.capitalize(type as string) &&
           //if param is undefined, fallback to workout property
           workout.difficulty === (params.difficulty ?? workout.difficulty) &&
           workout.duration === Number(params?.duration ?? workout.duration) &&
