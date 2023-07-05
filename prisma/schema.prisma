@@ -59,10 +59,80 @@ model GymLocation {
     longitude Decimal
 }
 
+model Category {
+    id      Int       @id
+    name    String
+    image   String
+    Workout Workout[]
+}
+
+model Equipment {
+    id      Int       @id
+    name    String
+    Workout Workout[]
+}
+
+model Image {
+    id                            Int       @id
+    image                         String
+    uuid                          String?
+    exercise_base                 Int?
+    exercise_base_uuid            Int?
+    is_main                       Boolean?
+    style                         String?
+    license                       Int?
+    license_title                 String?
+    license_author                String?
+    license_author_url            String?
+    license_object_url            String?
+    license_derivative_source_url String?
+    author_history                String[]
+    Workout                       Workout[]
+}
+
+model Video {
+    id                            Int       @id
+    video                         String
+    uuid                          String?
+    exercise_base                 Int?
+    exercise_base_uuid            Int?
+    is_main                       Boolean?
+    size                          Int?
+    duration                      String?
+    width                         Int?
+    height                        Int?
+    codec                         String?
+    codec_long                    String?
+    license                       Int?
+    license_title                 String?
+    license_author                String?
+    license_author_url            String?
+    license_object_url            String?
+    license_derivative_source_url String?
+    author_history                String[]
+    Workout                       Workout[]
+}
+
 model Workout {
-    id         Int     @id @default(autoincrement())
-    type       String
-    difficulty String
-    duration   Int
-    equipment  Boolean
+    id               Int         @id
+    name             String
+    duration         Int?
+    description      String?
+    category         Category    @relation(fields: [categoryId], references: [id])
+    categoryId       Int
+    equipment        Equipment[]
+    images           Image[]
+    videos           Video[]
+    uuid             String      @unique
+    exercise_base_id Int
+    creation_date    String
+    // aliases          String[]
+    // language          String?
+    // license           String?
+    // license_author    String?
+    // variations        Int[]
+    // comments          String?
+    // author_history    String[]
+    // muscles           String?
+    // muscles_secondary String?
 }
