@@ -7,10 +7,10 @@ import friends from "./routes/friends";
 import gymLocations from "./routes/gymLocations";
 import home from "./routes/home";
 import messages from "./routes/messages";
-import workouts from "./routes/workouts";
 import blogs from "./routes/blogs";
 import { Server } from "socket.io";
 import http from "http";
+import exercises from "./routes/exercises";
 import { client } from "./prismaClient";
 
 const app = express();
@@ -57,8 +57,8 @@ app.use("/", chatRoom);
 app.use("/", messages);
 app.use("/", gymLocations);
 app.use("/", friends);
-app.use("/", workouts);
 app.use("/", blogs);
+app.use("/", exercises);
 
 server.listen(4000, () => {
   console.log(`Server running on http://localhost:4000`);
