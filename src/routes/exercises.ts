@@ -36,8 +36,8 @@ if (!process.env.WGER_ACCESS_TOKEN) {
     "process.env.WGER_ACCESS_TOKEN is undefined. Check your env file configuration."
   );
 }
-const wgerApiUrl = process.env.WGER_API_URL;
-const wgerAccessToken = process.env.WGER_ACCESS_TOKEN;
+// const wgerApiUrl = process.env.WGER_API_URL;
+// const wgerAccessToken = process.env.WGER_ACCESS_TOKEN;
 
 router.get("/exercises", async (req, res) => {
   // const { photos } = await getImages();
@@ -161,9 +161,60 @@ router.get("/exercises", async (req, res) => {
   // }
   // fetchExercises(wgerApiUrl + "exerciseinfo");
   // res.send(200);
+  const { page, pageSize, categoryIds, equipment } = req.query;
+  const pageNumber = page ? parseInt(page as string) : 1;
+  const categoryIdsAsArr = categoryIds
+    ? (categoryIds as string).split(",")
+    : [];
+  const pageSizeNumber = pageSize ? parseInt(pageSize as string) : 10;
+  if (!process.env.DOMAIN) {
+    throw Error(
+      "process.env.DOMAIN is undefined. Check your env file configuration."
+    );
+  }
+  const baseUrl = process.env.DOMAIN;
   try {
-    const exercises = await client.workout.findMany();
-    res.json({ data: exercises });
+    const exercises = await client.workout.findMany({
+      include: {
+        images: true,
+        videos: true,
+        equipment: true,
+        category: true,
+      },
+      where: {
+        category: {
+          id:
+            categoryIdsAsArr.length > 0
+              ? { in: categoryIdsAsArr.map((id) => parseInt(id)) }
+              : undefined,
+        },
+        equipment:
+          //this looks weird: if equipment is true,
+          // then return all exercises that have equipment ([some]),
+          //otherwise return all exercises that don't have equipment ([])
+          equipment !== undefined
+            ? equipment === "true"
+              ? { some: { id: { not: undefined } } }
+              : { none: {} }
+            : {},
+      },
+      skip: (pageNumber - 1) * pageSizeNumber,
+      take: pageSizeNumber,
+    });
+    const totalDataLength = await client.workout.count();
+    const next =
+      pageNumber <= Math.ceil(totalDataLength / pageSizeNumber)
+        ? `${baseUrl}${req.originalUrl}?page=${
+            pageNumber + 1
+          }&pageSize=${pageSizeNumber}`
+        : null;
+    const prev =
+      pageNumber === 1
+        ? null
+        : `${baseUrl}${req.originalUrl}?page=${
+            pageNumber - 1
+          }&pageSize=${pageSizeNumber}`;
+    res.json({ next, prev, data: exercises });
   } catch (error) {
     console.error(error);
     res
