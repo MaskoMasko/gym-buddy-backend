@@ -25,6 +25,7 @@ model User {
     chatRoomId Int?
     Message    Message[]
     userId     Int?
+    Workout    Workout[]
 }
 
 // ChatRoom model
@@ -60,20 +61,20 @@ model GymLocation {
 }
 
 model Category {
-    id      Int       @id
-    name    String
-    image   String
-    Workout Workout[]
+    id       Int        @id
+    name     String
+    image    String
+    Exercise Exercise[]
 }
 
 model Equipment {
-    id      Int       @id
-    name    String
-    Workout Workout[]
+    id       Int        @id
+    name     String
+    Exercise Exercise[]
 }
 
 model Image {
-    id                            Int       @id
+    id                            Int        @id
     image                         String
     uuid                          String?
     exercise_base                 Int?
@@ -87,11 +88,11 @@ model Image {
     license_object_url            String?
     license_derivative_source_url String?
     author_history                String[]
-    Workout                       Workout[]
+    Exercise                      Exercise[]
 }
 
 model Video {
-    id                            Int       @id
+    id                            Int        @id
     video                         String
     uuid                          String?
     exercise_base                 Int?
@@ -110,22 +111,22 @@ model Video {
     license_object_url            String?
     license_derivative_source_url String?
     author_history                String[]
-    Workout                       Workout[]
+    Exercise                      Exercise[]
 }
 
-model Workout {
+model Exercise {
     id               Int         @id
     name             String
     duration         Int?
     description      String?
-    category         Category    @relation(fields: [categoryId], references: [id])
-    categoryId       Int
+    category         Category?   @relation(fields: [categoryId], references: [id])
+    categoryId       Int?
     equipment        Equipment[]
     images           Image[]
     videos           Video[]
-    uuid             String      @unique
-    exercise_base_id Int
-    creation_date    String
+    uuid             String?     @unique
+    exercise_base_id Int?
+    creation_date    String?
     // aliases          String[]
     // language          String?
     // license           String?
@@ -135,4 +136,17 @@ model Workout {
     // author_history    String[]
     // muscles           String?
     // muscles_secondary String?
+    Workout          Workout?    @relation(fields: [statisticsId], references: [id])
+    statisticsId     Int?
+}
+
+model Workout {
+    id           Int        @id @default(autoincrement())
+    date         DateTime
+    exercises    Exercise[]
+    duration     Int?
+    est_duration Int
+    completed    Boolean    @default(false)
+    User         User?      @relation(fields: [userId], references: [id])
+    userId       Int?
 }

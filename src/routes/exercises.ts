@@ -5,6 +5,8 @@ import { client } from "../prismaClient";
 
 const router = express.Router();
 
+export const REST_ID = 100000000;
+
 // async function getImages() {
 //   const url =
 //     "https://api.slingacademy.com/v1/sample-data/photos?offset=5&limit=100";
@@ -47,6 +49,7 @@ router.get("/exercises", async (req, res) => {
   //       Authorization: `Token ${wgerAccessToken}`,
   //     },
   //   });
+  //   console.log(response.data);
   //   if (response.data.next) {
   //     await fetchExercises(response.data.next);
   //     const newResponse = await response.data.results.map((exercise: any) => {
@@ -77,7 +80,7 @@ router.get("/exercises", async (req, res) => {
   //       const videos = (exercise.videos ?? []).map((item: any) => ({
   //         id: item.id,
   //       }));
-  //       await client.workout.create({
+  //       await client.exercise.create({
   //         data: {
   //           id: exercise.id,
   //           name: exercise.name,
@@ -131,7 +134,7 @@ router.get("/exercises", async (req, res) => {
   //         id: item.id,
   //       }));
 
-  //       await client.workout.create({
+  //       await client.exercise.create({
   //         data: {
   //           id: exercise.id,
   //           name: exercise.name,
@@ -174,7 +177,7 @@ router.get("/exercises", async (req, res) => {
   }
   const baseUrl = process.env.DOMAIN;
   try {
-    const exercises = await client.workout.findMany({
+    const exercises = await client.exercise.findMany({
       include: {
         images: true,
         videos: true,
