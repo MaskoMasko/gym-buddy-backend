@@ -11,6 +11,7 @@ import blogs from "./routes/blogs";
 import { Server } from "socket.io";
 import http from "http";
 import exercises from "./routes/exercises";
+import statistics from "./routes/statistics";
 import { client } from "./prismaClient";
 
 const app = express();
@@ -59,6 +60,7 @@ app.use("/", gymLocations);
 app.use("/", friends);
 app.use("/", blogs);
 app.use("/", exercises);
+app.use("/", statistics);
 
 server.listen(4000, () => {
   console.log(`Server running on http://localhost:4000`);
