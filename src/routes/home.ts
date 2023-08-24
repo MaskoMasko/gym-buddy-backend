@@ -2,7 +2,7 @@ import express from "express";
 import jwt, { JwtPayload as ORJwtPayload } from "jsonwebtoken";
 import { client } from "../prismaClient";
 import { jwtSecret } from "../constants";
-import { authenticateToken } from "../middleware";
+import { authenticateToken } from "./auth/middleware";
 
 interface JwtPayload extends ORJwtPayload {
   email: string;
