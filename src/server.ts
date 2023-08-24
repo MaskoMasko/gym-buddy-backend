@@ -1,18 +1,19 @@
 import bodyParser from "body-parser";
 import cookieparser from "cookie-parser";
 import express from "express";
-import authRouter from "./routes/auth";
-import chatRoom from "./routes/chatRoom";
-import friends from "./routes/friends";
+import http from "http";
+import { Server } from "socket.io";
+import authRouter from "./routes/auth/auth";
+import blogs from "./routes/blogs/blogs";
+import chatRoom from "./routes/social/chatRoom";
+import comments from "./routes/blogs/comments";
+import exercises from "./routes/exercises";
+import friends from "./routes/social/friends";
 import gymLocations from "./routes/gymLocations";
 import home from "./routes/home";
-import messages from "./routes/messages";
-import blogs from "./routes/blogs";
-import { Server } from "socket.io";
-import http from "http";
-import exercises from "./routes/exercises";
+import likes from "./routes/blogs/likes";
+import messages from "./routes/social/messages";
 import statistics from "./routes/statistics";
-import { client } from "./prismaClient";
 
 const app = express();
 const server = http.createServer(app);
@@ -61,6 +62,8 @@ app.use("/", friends);
 app.use("/", blogs);
 app.use("/", exercises);
 app.use("/", statistics);
+app.use("/", comments);
+app.use("/", likes);
 
 server.listen(4000, () => {
   console.log(`Server running on http://localhost:4000`);
