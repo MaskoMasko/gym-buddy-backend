@@ -25,7 +25,50 @@ model User {
     chatRoomId Int?
     Message    Message[]
     userId     Int?
-    Workout    Workout[]
+    workouts   Workout[]
+    posts      Post[]
+    likes      Like[]
+    comments   Comment[]
+}
+
+model Post {
+    id        Int       @id @default(autoincrement())
+    title     String
+    content   String
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    author    User      @relation(fields: [authorId], references: [id])
+    authorId  Int
+    media     Media[]
+    likes     Like[]
+    comments  Comment[]
+}
+
+model Media {
+    id          Int     @id @default(autoincrement())
+    description String?
+    url         String?
+    postId      Int
+    post        Post    @relation(fields: [postId], references: [id])
+}
+
+model Like {
+    id        Int      @id @default(autoincrement())
+    post      Post     @relation(fields: [postId], references: [id])
+    postId    Int
+    user      User     @relation(fields: [userId], references: [id])
+    userId    Int
+    createdAt DateTime @default(now())
+}
+
+model Comment {
+    id        Int      @id @default(autoincrement())
+    content   String
+    post      Post     @relation(fields: [postId], references: [id])
+    postId    Int
+    author    User     @relation(fields: [authorId], references: [id])
+    authorId  Int
+    createdAt DateTime @default(now())
 }
 
 // ChatRoom model
