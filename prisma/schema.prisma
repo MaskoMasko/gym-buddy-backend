@@ -29,6 +29,7 @@ model User {
     posts      Post[]
     likes      Like[]
     comments   Comment[]
+    Review     Review[]
 }
 
 model Post {
@@ -92,15 +93,6 @@ model Message {
     chatRoomId Int
     User       User? @relation(fields: [userId], references: [id])
     userId     Int?
-}
-
-//GymLocation
-model GymLocation {
-    id        Int     @id @default(autoincrement())
-    name      String
-    rating    Float
-    latitude  Decimal
-    longitude Decimal
 }
 
 model Category {
@@ -192,4 +184,42 @@ model Workout {
     completed    Boolean    @default(false)
     User         User?      @relation(fields: [userId], references: [id])
     userId       Int?
+}
+
+model Gym {
+    id           Int           @id @default(autoincrement())
+    name         String
+    rating       Float
+    latitude     Decimal
+    longitude    Decimal
+    website      String?
+    address      String?
+    reviews      Review[]
+    workingHours WorkingHour[]
+    images       GymImage[]
+}
+
+model Review {
+    id     Int    @id @default(autoincrement())
+    text   String
+    userId Int
+    user   User   @relation(fields: [userId], references: [id])
+    gym    Gym?   @relation(fields: [gymId], references: [id])
+    gymId  Int?
+}
+
+model WorkingHour {
+    id    Int    @id @default(autoincrement())
+    day   String
+    open  String
+    close String
+    gymId Int
+    gym   Gym    @relation(fields: [gymId], references: [id])
+}
+
+model GymImage {
+    id    Int    @id @default(autoincrement())
+    uri   String
+    gymId Int
+    gym   Gym    @relation(fields: [gymId], references: [id])
 }
