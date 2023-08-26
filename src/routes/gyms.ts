@@ -5,73 +5,46 @@ const router = express.Router();
 
 //this should get converted to post method
 router.get("/add-gym", async (req, res) => {
+  const {
+    name,
+    rating,
+    reviews,
+    workingHours,
+    website,
+    images,
+    address,
+    longitude,
+    latitude,
+  } = req.body;
+  const reviewsCreate = reviews.map((review: any) => {
+    return {
+      user: {
+        //rewrite as create or connect
+        connect: {
+          id: review.userId,
+        },
+      },
+      text: review.text,
+    };
+  });
+
   const location = await client.gym.create({
     data: {
-      name: "Elite Gym",
-      rating: 5,
+      name,
+      rating,
       reviews: {
-        create: [
-          {
-            user: {
-              connect: {
-                id: 2,
-              },
-            },
-            text: "This is the best gym in the world!",
-          },
-        ],
+        create: reviewsCreate,
       },
       workingHours: {
-        create: [
-          {
-            day: "Monday",
-            open: "08:00",
-            close: "22:00",
-          },
-          {
-            day: "Tuesday",
-            open: "08:00",
-            close: "22:00",
-          },
-
-          {
-            day: "Wednesday",
-            open: "08:00",
-            close: "22:00",
-          },
-          {
-            day: "Thursday",
-            open: "08:00",
-            close: "22:00",
-          },
-          {
-            day: "Friday",
-            open: "08:00",
-            close: "22:00",
-          },
-          {
-            day: "Saturday",
-            open: "08:00",
-            close: "14:00",
-          },
-          {
-            day: "Sunday",
-            open: "08:00",
-            close: "14:00",
-          },
-        ],
+        create: workingHours,
       },
-      website: "https://elitegym.io/",
+      website,
       images: {
-        create: [
-          { uri: "https://picsum.photos/200/300" },
-          { uri: "https://picsum.photos/200/300" },
-          { uri: "https://picsum.photos/200/300" },
-        ],
+        create: images,
       },
-      address: "Supetarska 5, 52341, Žminj",
-      latitude: 45.1472369,
-      longitude: 13.8957274,
+      address,
+      latitude,
+      longitude,
     },
   });
   // console.log({ location });
