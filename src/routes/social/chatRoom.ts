@@ -78,13 +78,21 @@ router.get(`/users-chat-rooms/:userId`, async (req, res) => {
       id: Number(userId),
     },
     include: {
-      chatRooms: true,
+      chatRooms: {
+        include: {
+          messages: true,
+          participants: true,
+        }
+      },
     },
   });
   if (!userWithChatRooms) {
     return res.send(`User with id ${userId} does not exist`);
   }
-  res.json({ data: userWithChatRooms.chatRooms });
+  const chatRoomsWithLastMessage = userWithChatRooms.chatRooms.map((chatRoom) => {
+    return {...chatRoom, lastMessage: chatRoom.messages.at(-1) ?? "Start a new conversation!"}
+  })
+  res.json({ data: chatRoomsWithLastMessage});
 });
 
 export default router;
